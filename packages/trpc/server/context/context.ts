@@ -1,0 +1,47 @@
+import type { IncomingMessage, ServerResponse } from 'http';
+import prisma from "@course-selling-platform/db";
+
+/**
+ * Defines your inner context shape.
+ * Add fields here that the inner context brings.
+ */
+export interface CreateInnerContextOptions {
+    prisma: typeof prisma;
+    userId?: string; // Optional user ID
+    req?: IncomingMessage;
+    res?: ServerResponse;
+}
+
+/**
+ * Inner context. Will always be available in your procedures, in contrast to the outer context.
+ *
+ * Also useful for:
+ * - testing, so you don't have to mock Next.js' `req`/`res`
+ * - tRPC's `createSSGHelpers` where we don't have `req`/`res`
+ *
+ * @see https://trpc.io/docs/v11/context#inner-and-outer-context
+ */
+export async function createInnerTRPCContext(opts: CreateInnerContextOptions) {
+    return {
+        prisma,
+        userId: opts.userId ?? null,
+    };
+}
+
+/**
+ * Outer context. Used in the routers and will e.g. bring `req` & `res` to the context as "not `undefined`".
+ *
+ * @see https://trpc.io/docs/v11/context#inner-and-outer-context
+ */
+export const createTRPCContext = async (opts: CreateInnerContextOptions) => {
+    const innerContext = await createInnerTRPCContext({
+        prisma,
+        userId: opts.userId,
+    });
+
+    return {
+        ...innerContext,
+        req: opts.req,
+        res: opts.res,
+    };
+};
