@@ -1,5 +1,5 @@
 import { router } from '../trpc';
-import { courseRouter } from './course';
+import { courseRouter } from './courseRouter';
 
 export const appRouter = router({
     course: courseRouter
